@@ -24,6 +24,8 @@ class BodyPartSelector extends StatefulWidget {
     this.selectedOutlineColor,
     this.unselectedOutlineColor,
     this.onBodyPartTapped,
+    this.onMarkerAdded,
+    this.onMarkerFocused,
     this.initialMarkers = const <BodyPartMarker>[],
     this.markerColor,
     this.markerOutlineColor,
@@ -54,6 +56,16 @@ class BodyPartSelector extends StatefulWidget {
   /// user. Receives a [BodyPartTapDetails] object describing the action,
   /// updated selections and the current marker list.
   final ValueChanged<BodyPartTapDetails>? onBodyPartTapped;
+
+  /// Called only when a new marker has been added as a direct result of a
+  /// user tap. This is a convenience callback that filters
+  /// [onBodyPartTapped] events with [BodyPartTapAction.markerAdded].
+  final ValueChanged<BodyPartTapDetails>? onMarkerAdded;
+
+  /// Called only when an existing marker was tapped (focused). This is a
+  /// convenience callback that filters [onBodyPartTapped] events with
+  /// [BodyPartTapAction.markerFocused].
+  final ValueChanged<BodyPartTapDetails>? onMarkerFocused;
 
   /// {@template body_part_selector.mirrored}
   /// Whether the selection should be mirrored, or symmetric, such that when
@@ -193,17 +205,17 @@ class _BodyPartSelectorState extends State<BodyPartSelector> {
     });
 
     widget.onSelectionUpdated?.call(updated);
-    widget.onBodyPartTapped?.call(
-      BodyPartTapDetails(
-        id: id,
-        isSelected: isSelected,
-        updatedBodyParts: updated,
-        marker: marker,
-        layerSide: marker.layerSide ?? widget.side,
-        action: BodyPartTapAction.markerAdded,
-        markers: _markers,
-      ),
+    final details = BodyPartTapDetails(
+      id: id,
+      isSelected: isSelected,
+      updatedBodyParts: updated,
+      marker: marker,
+      layerSide: marker.layerSide ?? widget.side,
+      action: BodyPartTapAction.markerAdded,
+      markers: _markers,
     );
+    widget.onBodyPartTapped?.call(details);
+    widget.onMarkerAdded?.call(details);
   }
 
   BodyParts _updateBodyPartsSelection(
@@ -247,17 +259,17 @@ class _BodyPartSelectorState extends State<BodyPartSelector> {
     if (_activeMarker != marker) {
       setState(() => _activeMarker = marker);
     }
-    widget.onBodyPartTapped?.call(
-      BodyPartTapDetails(
-        id: marker.id,
-        isSelected: widget.bodyParts.toMap()[marker.id] ?? false,
-        updatedBodyParts: widget.bodyParts,
-        marker: marker,
-        layerSide: marker.layerSide ?? widget.side,
-        action: BodyPartTapAction.markerFocused,
-        markers: _markers,
-      ),
+    final details = BodyPartTapDetails(
+      id: marker.id,
+      isSelected: widget.bodyParts.toMap()[marker.id] ?? false,
+      updatedBodyParts: widget.bodyParts,
+      marker: marker,
+      layerSide: marker.layerSide ?? widget.side,
+      action: BodyPartTapAction.markerFocused,
+      markers: _markers,
     );
+    widget.onBodyPartTapped?.call(details);
+    widget.onMarkerFocused?.call(details);
   }
 
   @override
@@ -291,7 +303,7 @@ class _BodyPartSelectorState extends State<BodyPartSelector> {
     final selectedOutlineColor =
         widget.selectedOutlineColor ?? bodyOutlineColor;
     final double outlineWidth =
-        (widget.bodyOutlineWidth ?? 2.0).clamp(0.0, 10.0) as double;
+        (widget.bodyOutlineWidth ?? 2.0).clamp(0.0, 10.0);
     final markerFill = widget.markerColor ?? colorScheme.tertiary;
     final markerOutline = widget.markerHasOutline
         ? widget.markerOutlineColor ?? colorScheme.onTertiary

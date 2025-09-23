@@ -24,16 +24,25 @@ Check out the example file for a simple usage pattern.
 
 ### Listening to taps & markers
 
-`BodyPartSelector` now exposes an `onBodyPartTapped` callback that provides
-`BodyPartTapDetails` with the tapped body part identifier, the updated
-`BodyParts` selection, the action (`markerAdded`/`markerFocused`), and a
-`BodyPartMarker` describing the tap (including normalised coordinates). The
-widget stores markers internally, renders them as pins (highlighting the body
-segment as long as at least one marker is present), and returns the full list
-through the callback so that you can persist the data and restore it later (for
-example in FlutterFlow). Tapping an existing pin does not trigger any built-in
-menu; instead, the callback is fired with `markerFocused` so you can implement
-custom actions (e.g. deletion or editing) in your own UI.
+`BodyPartSelector` exposes three callbacks for interaction events:
+
+1. `onBodyPartTapped` – unified, detailed callback for every tap related
+  to markers (add + focus). Always receives a `BodyPartTapDetails` payload.
+2. `onMarkerAdded` – fires only when a brand new marker is created
+  (filtered subset where `action == BodyPartTapAction.markerAdded`).
+3. `onMarkerFocused` – fires only when the user taps an existing marker
+  without adding a new one (`action == BodyPartTapAction.markerFocused`).
+
+All three provide the same `BodyPartTapDetails` instance so you can choose the
+API style that best matches your integration platform (e.g. FlutterFlow, where
+conditionals on enums may be more cumbersome). The widget stores markers
+internally, renders them as pins (highlighting a segment while it still owns at
+least one marker) and returns the full, current marker list in every payload so
+you can persist and later restore state.
+
+Tapping an existing pin does not mutate the list (unless you choose to in your
+own code); you simply get a `markerFocused` event giving you the opportunity to
+open a bottom sheet / dialog to edit or remove it.
 
 You can fully theme the selector: customise body fill/highlight colors, outline
 color and width, marker size/colour, focused-marker color, or even disable
@@ -120,6 +129,8 @@ you can persist back into your storage layer.
   `BodyParts` after each interaction.
 - `side` (required): which body side to render.
 - `onBodyPartTapped` (optional): detailed tap callback with marker payload.
+- `onMarkerAdded` (optional): fires only for newly added markers.
+- `onMarkerFocused` (optional): fires only when an existing marker is tapped.
 - `mirrored` (optional, defaults to `false`): toggle symmetrical selection.
 - `selectedColor` (optional): highlight colour; defaults to
   `Theme.of(context).colorScheme.inversePrimary`.
@@ -148,6 +159,8 @@ you can persist back into your storage layer.
 - `bodyParts` (required): current selection shared across rotations.
 - `onSelectionUpdated` (optional): called when the shared selection changes.
 - `onBodyPartTapped` (optional): detailed tap callback.
+- `onMarkerAdded` (optional): new marker events across any side.
+- `onMarkerFocused` (optional): existing marker tap events across any side.
 - `mirrored` (optional, defaults to `false`).
 - `selectedColor`, `unselectedColor`, `selectedOutlineColor`,
   `unselectedOutlineColor` (optional): forwarded to the underlying selector.
@@ -177,6 +190,63 @@ animates one step clockwise.
 When using `BodyPartSelectorTurnable`, supply `initialMarkers` as a map keyed by
 `BodySide` to pre-populate markers for each side, and handle the same
 `onBodyPartTapped` callback to keep the data in sync with your backend.
+
+### Type‑safe body part identifiers (enum)
+
+The package exposes an enum `BodyPartId` whose values are 1:1 aligned with:
+1. Field names inside the `BodyParts` data class.
+2. `id` attributes in the bundled SVG assets.
+
+This gives you type safety when storing / transmitting selections, especially
+useful in tools like FlutterFlow where you may want strong constraints on
+allowed strings.
+
+Common snippets:
+```dart
+// Create an empty selection
+var selection = const BodyParts();
+
+// Enable a subset using enum values
+selection = BodyParts.fromIds([
+  BodyPartId.head,
+  BodyPartId.leftKnee,
+  BodyPartId.rightElbow,
+]);
+
+// Read selected ids as enum values
+final selected = selection.selectedIds; // List<BodyPartId>
+
+// Convert to plain String IDs for persistence
+final stringIds = selected.map((e) => e.name).toList();
+
+// Restore later from stored String IDs
+final restored = BodyParts.fromIds(
+  stringIds.map(BodyPartId.values.byName),
+);
+```
+
+#### FlutterFlow integration
+
+In a Custom Action or Custom Widget you can:
+```dart
+import 'package:body_part_selector/body_part_selector.dart';
+
+// Toggle a part by its enum id using existing API
+BodyParts togglePart(BodyParts current, BodyPartId id, {bool mirror = false}) {
+  return current.withToggledId(id.name, mirror: mirror);
+}
+
+// Produce JSON map for storage (e.g. in Firestore)
+Map<String, bool> toStorage(BodyParts parts) => parts.toMap();
+
+// Recreate from list of enum names stored in an array field
+BodyParts fromStoredStrings(List<String> ids) =>
+    BodyParts.fromIds(ids.map(BodyPartId.values.byName));
+```
+
+Because the enum names must stay in sync with the SVG ids, treat adding/removing
+enum values as a breaking change (semver: major). The test suite contains a
+consistency test to guarantee alignment.
 
 ## Example
 To run the example open the ``example`` folder and run ``flutter create .``

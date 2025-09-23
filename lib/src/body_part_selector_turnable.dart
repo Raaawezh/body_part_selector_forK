@@ -19,6 +19,8 @@ class BodyPartSelectorTurnable extends StatefulWidget {
     super.key,
     this.onSelectionUpdated,
     this.onBodyPartTapped,
+    this.onMarkerAdded,
+    this.onMarkerFocused,
     this.onRotateRequested,
     this.mirrored = false,
     this.selectedColor,
@@ -50,6 +52,12 @@ class BodyPartSelectorTurnable extends StatefulWidget {
 
   /// Emits detailed information whenever a body part on any side is tapped.
   final ValueChanged<BodyPartTapDetails>? onBodyPartTapped;
+
+  /// Convenience callback fired only when a marker is added on any side.
+  final ValueChanged<BodyPartTapDetails>? onMarkerAdded;
+
+  /// Convenience callback fired only when an existing marker is tapped on any side.
+  final ValueChanged<BodyPartTapDetails>? onMarkerFocused;
 
   /// Invoked right before the widget rotates clockwise (either via the built-in
   /// button or the external trigger). Use this to perform side effects in the
@@ -181,6 +189,8 @@ class _BodyPartSelectorTurnableState extends State<BodyPartSelectorTurnable> {
                 bodyParts: widget.bodyParts,
                 onSelectionUpdated: widget.onSelectionUpdated,
                 onBodyPartTapped: widget.onBodyPartTapped,
+                onMarkerAdded: widget.onMarkerAdded,
+                onMarkerFocused: widget.onMarkerFocused,
                 mirrored: widget.mirrored,
                 selectedColor: widget.selectedColor,
                 unselectedColor: widget.unselectedColor,

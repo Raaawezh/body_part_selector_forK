@@ -63,10 +63,10 @@ class _MyHomePageState extends State<MyHomePage> {
                 onBodyPartTapped: _onBodyPartTapped,
                 rotateRightTrigger: _rotateTrigger,
                 labelData: const RotationStageLabelData(
-                  front: 'Vorne',
-                  left: 'Links',
-                  right: 'Rechts',
-                  back: 'Hinten',
+                  front: 'Front',
+                  left: 'Left',
+                  right: 'Right',
+                  back: 'Back',
                 ),
                 initialMarkers: _initialMarkers,
                 bodyFillColor: Colors.grey.shade200,
@@ -74,16 +74,17 @@ class _MyHomePageState extends State<MyHomePage> {
                 bodyOutlineWidth: 1.5,
                 highlightColor: Colors.purple.shade200,
                 markerColor: Colors.purple,
-                markerRadius: 8,
+                markerRadius: 6,
                 markerHasOutline: false,
                 activeMarkerColor: Colors.deepOrange,
+                showRotateButton: false,
               ),
             ),
             const Divider(),
             Padding(
               padding: const EdgeInsets.all(16),
               child: _lastTap == null
-                  ? const Text('Tap a body part to place a marker.')
+                  ? const Text('Tap a body part to place a marker.\n\n')
                   : Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       mainAxisSize: MainAxisSize.min,

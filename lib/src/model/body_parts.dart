@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'body_part_id.dart';
 
 part 'body_parts.freezed.dart';
 part 'body_parts.g.dart';
@@ -39,6 +40,48 @@ class BodyParts with _$BodyParts {
   factory BodyParts.fromJson(Map<String, dynamic> json) =>
       _$BodyPartsFromJson(json);
   const BodyParts._();
+
+  /// Returns list of selected body part identifiers as enum values.
+  List<BodyPartId> get selectedIds => [
+        for (final entry in toMap().entries)
+          if (entry.value)
+            BodyPartId.values.firstWhere(
+              (BodyPartId e) => e.name == entry.key,
+              orElse: () =>
+                  throw StateError('Unknown body part id: ${entry.key}'),
+            ),
+      ];
+
+  /// Creates a new instance with the provided enum ids set to true.
+  factory BodyParts.fromIds(Iterable<BodyPartId> ids) {
+    final set = ids.map((e) => e.name).toSet();
+    return BodyParts(
+      head: set.contains('head'),
+      neck: set.contains('neck'),
+      leftShoulder: set.contains('leftShoulder'),
+      leftUpperArm: set.contains('leftUpperArm'),
+      leftElbow: set.contains('leftElbow'),
+      leftLowerArm: set.contains('leftLowerArm'),
+      leftHand: set.contains('leftHand'),
+      rightShoulder: set.contains('rightShoulder'),
+      rightUpperArm: set.contains('rightUpperArm'),
+      rightElbow: set.contains('rightElbow'),
+      rightLowerArm: set.contains('rightLowerArm'),
+      rightHand: set.contains('rightHand'),
+      upperBody: set.contains('upperBody'),
+      lowerBody: set.contains('lowerBody'),
+      leftUpperLeg: set.contains('leftUpperLeg'),
+      leftKnee: set.contains('leftKnee'),
+      leftLowerLeg: set.contains('leftLowerLeg'),
+      leftFoot: set.contains('leftFoot'),
+      rightUpperLeg: set.contains('rightUpperLeg'),
+      rightKnee: set.contains('rightKnee'),
+      rightLowerLeg: set.contains('rightLowerLeg'),
+      rightFoot: set.contains('rightFoot'),
+      abdomen: set.contains('abdomen'),
+      vestibular: set.contains('vestibular'),
+    );
+  }
 
   /// A constant representing a selection with all [BodyParts] selected.
   static const all = BodyParts(
