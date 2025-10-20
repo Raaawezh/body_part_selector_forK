@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:body_part_selector/body_part_selector.dart';
+import 'package:body_part_selector/src/service/svg_copy/vector_drawable.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
@@ -50,6 +51,6 @@ class SvgService {
       ),
     );
     notifier.value =
-        await svg.fromSvgBytes(svgBytes.buffer.asUint8List(), "svg");
+        SvgPicture.memory(svgBytes.buffer.asUint8List()) as Drawable?;
   }
 }

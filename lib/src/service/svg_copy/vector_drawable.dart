@@ -2,7 +2,8 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 import 'dart:ui';
 
-import 'package:body_part_selector/src/service/svg_copy/render_picture.dart' as render_picture;
+import 'package:body_part_selector/src/service/svg_copy/render_picture.dart'
+    as render_picture;
 // import 'package:body_part_selector/src/service/svg_copy/svg/parsers.dart' show affineMatrix;
 import 'package:meta/meta.dart';
 import 'package:path_drawing/path_drawing.dart';
@@ -667,138 +668,6 @@ abstract class DrawableGradient {
 
   /// Creates a [Shader] (i.e. a [Gradient]) from this object.
   Shader createShader(Rect bounds);
-}
-
-/// Represents the data needed to create a [Gradient.linear].
-@immutable
-class DrawableLinearGradient extends DrawableGradient {
-  /// Creates a new [DrawableLinearGradient].
-  const DrawableLinearGradient({
-    required this.from,
-    required this.to,
-    required List<double> offsets,
-    required List<Color> colors,
-    required TileMode spreadMethod,
-    required GradientUnitMode unitMode,
-    Float64List? transform,
-  }) : super(
-          offsets,
-          colors,
-          spreadMethod: spreadMethod,
-          unitMode: unitMode,
-          transform: transform,
-        );
-
-  /// The starting offset of this gradient.
-  final Offset from;
-
-  /// The ending offset of this gradient.
-  final Offset to;
-
-  @override
-  Shader createShader(Rect bounds) {
-    final bool isObjectBoundingBox =
-        unitMode == GradientUnitMode.objectBoundingBox;
-
-    Matrix4 m4transform = transform == null
-        ? Matrix4.identity()
-        : Matrix4.fromFloat64List(transform!);
-
-    if (isObjectBoundingBox) {
-      final Matrix4 scale =
-          affineMatrix(bounds.width, 0.0, 0.0, bounds.height, 0.0, 0.0);
-      final Matrix4 translate =
-          affineMatrix(1.0, 0.0, 0.0, 1.0, bounds.left, bounds.top);
-      m4transform = translate.multiplied(scale)..multiply(m4transform);
-    }
-
-    final Vector3 v3from = m4transform.transform3(
-      Vector3(
-        from.dx,
-        from.dy,
-        0.0,
-      ),
-    );
-    final Vector3 v3to = m4transform.transform3(
-      Vector3(
-        to.dx,
-        to.dy,
-        0.0,
-      ),
-    );
-
-    return Gradient.linear(
-      Offset(v3from.x, v3from.y),
-      Offset(v3to.x, v3to.y),
-      colors!,
-      offsets,
-      spreadMethod,
-    );
-  }
-}
-
-/// Represents the information needed to create a [Gradient.radial].
-@immutable
-class DrawableRadialGradient extends DrawableGradient {
-  /// Creates a [DrawableRadialGradient].
-  const DrawableRadialGradient({
-    required this.center,
-    required this.radius,
-    required this.focal,
-    this.focalRadius = 0.0,
-    required List<double> offsets,
-    required List<Color> colors,
-    required TileMode spreadMethod,
-    required GradientUnitMode unitMode,
-    Float64List? transform,
-  }) : super(
-          offsets,
-          colors,
-          spreadMethod: spreadMethod,
-          unitMode: unitMode,
-          transform: transform,
-        );
-
-  /// The center of the radial gradient.
-  final Offset center;
-
-  /// The radius of the radial gradient.
-  final double? radius;
-
-  /// The focal point, if any, for a two point conical gradient.
-  final Offset focal;
-
-  /// The radius of the focal point.
-  final double focalRadius;
-
-  @override
-  Shader createShader(Rect bounds) {
-    final bool isObjectBoundingBox =
-        unitMode == GradientUnitMode.objectBoundingBox;
-
-    Matrix4 m4transform = transform == null
-        ? Matrix4.identity()
-        : Matrix4.fromFloat64List(transform!);
-
-    if (isObjectBoundingBox) {
-      final Matrix4 scale =
-          affineMatrix(bounds.width, 0.0, 0.0, bounds.height, 0.0, 0.0);
-      final Matrix4 translate =
-          affineMatrix(1.0, 0.0, 0.0, 1.0, bounds.left, bounds.top);
-      m4transform = translate.multiplied(scale)..multiply(m4transform);
-    }
-
-    return Gradient.radial(
-      center,
-      radius!,
-      colors!,
-      offsets,
-      spreadMethod,
-      m4transform.storage,
-      focal,
-      0.0,
-    );
-  }
 }
 
 /// Contains the viewport size and offset for a Drawable.
