@@ -1,10 +1,9 @@
 import 'dart:async';
 
 import 'package:body_part_selector/body_part_selector.dart';
-import 'package:body_part_selector/src/service/svg_copy/vector_drawable.dart';
+import 'package:body_part_selector/src/service/local_copy/svgPackage/flutter_svg.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// A singleton service that loads the SVGs for the body sides.
 class SvgService {
@@ -50,7 +49,9 @@ class SvgService {
         right: "packages/body_part_selector/m_right.svg",
       ),
     );
-    notifier.value =
-        SvgPicture.memory(svgBytes.buffer.asUint8List()) as Drawable?;
+    notifier.value = await svg.fromSvgBytes(
+      svgBytes.buffer.asUint8List(),
+      "svg",
+    ) as Drawable?;
   }
 }

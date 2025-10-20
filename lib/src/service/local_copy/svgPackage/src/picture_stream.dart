@@ -5,10 +5,9 @@
 import 'dart:async';
 import 'dart:ui' show Picture, Rect, Size;
 
-import 'package:body_part_selector/src/service/svg_copy/vector_drawable.dart';
+import 'package:body_part_selector/src/service/local_copy/svgPackage/flutter_svg.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/rendering.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 
 /// The signature of a method that listens for errors on picture stream resolution.
 typedef PictureErrorListener = void Function(

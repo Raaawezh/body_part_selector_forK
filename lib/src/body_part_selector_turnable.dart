@@ -2,8 +2,8 @@ import 'package:body_part_selector/src/body_part_selector.dart';
 import 'package:body_part_selector/src/model/body_part_marker.dart';
 import 'package:body_part_selector/src/model/body_parts.dart';
 import 'package:body_part_selector/src/model/body_side.dart';
+import 'package:body_part_selector/src/service/local_copy/svgPackage/flutter_svg.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:rotation_stage/rotation_stage.dart';
 
 export 'package:rotation_stage/rotation_stage.dart';

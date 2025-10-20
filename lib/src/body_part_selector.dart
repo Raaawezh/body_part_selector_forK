@@ -3,13 +3,10 @@ import 'dart:math';
 import 'package:body_part_selector/src/model/body_part_marker.dart';
 import 'package:body_part_selector/src/model/body_parts.dart';
 import 'package:body_part_selector/src/model/body_side.dart';
-import 'package:body_part_selector/src/service/svg_copy/vector_drawable.dart';
+import 'package:body_part_selector/src/service/local_copy/svgPackage/flutter_svg.dart';
 import 'package:body_part_selector/src/service/svg_service.dart';
 import 'package:flutter/foundation.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:touchable/touchable.dart';
 
 /// A widget that allows for selecting body parts.
