@@ -30,23 +30,77 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+  // --- state fields (keep these) ---
   BodyParts _bodyParts = const BodyParts();
   final Map<BodySide, List<BodyPartMarker>> _markersBySide = {
     for (final side in BodySide.values) side: <BodyPartMarker>[],
   };
   BodyPartTapDetails? _lastTap;
   int _rotateTrigger = 0;
+  BodySide _currentSide = BodySide.front; // track which side is shown
 
   Map<BodySide, List<BodyPartMarker>> get _initialMarkers => {
         for (final entry in _markersBySide.entries)
-          entry.key: List<BodyPartMarker>.of(entry.value),
+          entry.key: List.of(entry.value),
       };
 
+// --- updated tap handler ---
   void _onBodyPartTapped(BodyPartTapDetails details) {
     final side = details.marker.side;
+    final tappedMarker = details.marker;
+    final tappedId = details.id;
+
     setState(() {
-      _markersBySide[side] = List<BodyPartMarker>.of(details.markers);
+      final markers = List<BodyPartMarker>.of(_markersBySide[side]!);
+
+      // Check if marker already exists (means it's a double-tap)
+      final existingIndex = markers.indexWhere((m) => m.id == tappedMarker.id);
+
+      if (existingIndex != -1) {
+        // 👇 Double-tap: remove marker + remove highlight (force deselect)
+        markers.removeAt(existingIndex);
+
+        // Explicitly unselect the body part in the BodyParts state
+      } else { 
+        // 👇 Normal tap: add marker + highlight the part
+        markers.add(tappedMarker);
+      }
+      _bodyParts = _bodyParts.withToggledId(
+        tappedId,
+      );
+      _markersBySide[side] = markers;
       _lastTap = details;
+    });
+  }
+
+// --- updated rotate handler ---
+  void _rotateRight() {
+    setState(() {
+      _rotateTrigger++;
+
+      // rotation order: front -> right -> back -> left -> front
+      final next = {
+        BodySide.front: BodySide.right,
+        BodySide.right: BodySide.back,
+        BodySide.back: BodySide.left,
+        BodySide.left: BodySide.front,
+      };
+
+      final newSide = next[_currentSide] ?? BodySide.front;
+
+      // If the new side has never been tapped (no markers),
+      // clear markers/highlights from the sides that haven't been tapped.
+      // This prevents front markers from automatically mirroring to back
+      // unless the user tapped the back side previously.
+      if (_markersBySide[newSide]?.isEmpty ?? true) {
+        for (final side in BodySide.values) {
+          if (side != newSide && (_markersBySide[side]?.isEmpty ?? true)) {
+            // only clear sides that are empty OR you can clear all others:
+            _markersBySide[side] = [];
+          }
+        }
+      }
+      _currentSide = newSide;
     });
   }
 
@@ -104,7 +158,7 @@ class _MyHomePageState extends State<MyHomePage> {
             Padding(
               padding: const EdgeInsets.only(bottom: 24),
               child: ElevatedButton.icon(
-                onPressed: () => setState(() => _rotateTrigger++),
+                onPressed: _rotateRight,
                 icon: const Icon(Icons.rotate_right),
                 label: const Text('Rotate right'),
               ),
