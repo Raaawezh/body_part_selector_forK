@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
         markers.removeAt(existingIndex);
 
         // Explicitly unselect the body part in the BodyParts state
-      } else { 
+      } else {
         // 👇 Normal tap: add marker + highlight the part
         markers.add(tappedMarker);
       }
@@ -112,6 +112,7 @@ class _MyHomePageState extends State<MyHomePage> {
           children: [
             Expanded(
               child: BodyPartSelectorTurnable(
+                onMarkerFocused: (p) => setState(() => _bodyParts = p.updatedBodyParts),
                 bodyParts: _bodyParts,
                 onSelectionUpdated: (p) => setState(() => _bodyParts = p),
                 onBodyPartTapped: _onBodyPartTapped,
